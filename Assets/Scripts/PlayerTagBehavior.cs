@@ -6,6 +6,8 @@ public class PlayerTagBehavior : MonoBehaviour
 {
     [SerializeField]
     private bool _isTagged = false;
+    [SerializeField]
+    private ParticleSystem _particleSystem;
     private bool _canBeTagged = true;
 
     public bool IsTagged { get => _isTagged; }
