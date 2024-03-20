@@ -5,52 +5,76 @@ using UnityEngine;
 [RequireComponent(typeof(Rigidbody))]
 public class PlayerController : MonoBehaviour
 {
-    [SerializeField, Range(0, 10000), Tooltip("Player speed")]
-     private float _speed = 50;
+    [SerializeField]
+    private bool _isPlayer1 = true;
 
-    [SerializeField, Range(0, 2500), Tooltip("How much vertical force applied when jumping")]
-    private float _jumpForce = 1000;
+    [Space]
+    [SerializeField]
+    private float _maxSpeed = 2;
+    [SerializeField]
+    private float _acceleration = 100;
+    [SerializeField]
+    private float _jumpHeight = 2;
+
+    [Space]
+    [SerializeField]
+    private Vector3 _groundCheckPosition = new Vector3();
+    [SerializeField]
+    private float _groundCheckRadius = 0.45f;
 
     private Rigidbody _rigidbody;
-    private bool _isGrounded = false;
-
-    public float Speed
-    {
-        get => _speed;
-        set => _speed = Mathf.Max(0, value);
-    }
+    private Vector3 _moveDirection;
+    private bool _jumpInput;
+    private bool _isGrounded;
 
     private void Awake()
     {
-        //Get reference to rigidbody
+        //Get rigidbody component
         _rigidbody = GetComponent<Rigidbody>();
-        //Checks if statement is true, if not break program and return message
-        Debug.Assert(_rigidbody != null, "Rigidbody is null!");
-    }
-    // Start is called before the first frame update
-    void Start()
-    {
-        
     }
 
-    // Update is called once per frame
-    void Update()
+    private void Update()
     {
-        float moveInput = Input.GetAxisRaw("Horizontal");
-        float jumpInput = 0;
-
-        if (Input.GetKeyDown(KeyCode.Space) && _isGrounded)
+        //Get movement input
+        if(_isPlayer1)
         {
-            jumpInput = 1;
-            _isGrounded = false;
+            _moveDirection = new Vector3(Input.GetAxisRaw("Player1Horizontal"), 0, 0);
+            _jumpInput = Input.GetAxisRaw("Player1Jump") != 0;
         }
-        _rigidbody.AddForce(Vector3.right * moveInput * _speed * Time.deltaTime);
-        _rigidbody.AddForce(Vector3.up * jumpInput * _speed * Time.deltaTime, ForceMode.Impulse);
+        else
+        {
+            Debug.Log("Player2");
+            _moveDirection = new Vector3(Input.GetAxisRaw("Player2Horizontal"), 0, 0);
+            _jumpInput = Input.GetAxisRaw("Player2Jump") != 0;
+        }
     }
 
-    private void OnTriggerEnter(Collider other)
+    private void FixedUpdate()
     {
-        _isGrounded = true;
+        //Add movement force
+        Vector3 force = _moveDirection * _acceleration * Time.fixedDeltaTime;
+        _rigidbody.AddForce(force, ForceMode.VelocityChange);
+
+        //Clamp velocity to max speed
+        Vector3 velocity = _rigidbody.velocity;
+        velocity.x = Mathf.Clamp(velocity.x, -_maxSpeed, +_maxSpeed);
+
+        //Ground Check
+        _isGrounded = Physics.OverlapSphere(transform.position + _groundCheckPosition, _groundCheckRadius).Length > 1;
+
+        if(_jumpInput && _isGrounded)
+        {
+            //Calculate the force necessary to get jumpHeight unity units off the ground
+            float jumpForce = Mathf.Sqrt(_jumpHeight * -2f * Physics.gravity.y);
+            _rigidbody.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
+        }
     }
 
+#if UNITY_EDITOR
+    private void OnDrawGizmosSelected()
+    {
+        Gizmos.color = Color.yellow;
+        Gizmos.DrawWireSphere(transform.position + _groundCheckPosition, _groundCheckRadius);
+    }
+#endif
 }
