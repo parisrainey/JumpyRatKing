@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Net;
 using UnityEngine;
 
 public class PlayerTagBehavior : MonoBehaviour
@@ -20,6 +21,12 @@ public class PlayerTagBehavior : MonoBehaviour
         //Set that we're tagged
         _isTagged = true;
         _canBeTagged = false;
+
+        //If _isTagged true, Explode
+        if(_isTagged == true)
+        {
+            GetComponent<ParticleSystem>().Play();
+        }
 
         //Turn our trail renderer on
         TrailRenderer trail = GetComponent<TrailRenderer>();
