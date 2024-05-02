@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Net;
 using UnityEngine;
+using UnityEngine.Events;
 
 public class PlayerTagBehavior : MonoBehaviour
 {
@@ -9,6 +10,8 @@ public class PlayerTagBehavior : MonoBehaviour
     private bool _isTagged = false;
     [SerializeField]
     private ParticleSystem _particleSystem;
+
+    public UnityEvent OnTagged;
     private bool _canBeTagged = true;
 
     public bool IsTagged { get => _isTagged; }
@@ -22,17 +25,15 @@ public class PlayerTagBehavior : MonoBehaviour
         _isTagged = true;
         _canBeTagged = false;
 
-        //If _isTagged true, Explode
-        if(_isTagged == true)
-        {
-            GetComponent<ParticleSystem>().Play();
-        }
+        //Play Particle System
+        _particleSystem.Play();
 
         //Turn our trail renderer on
         TrailRenderer trail = GetComponent<TrailRenderer>();
         if (trail != null)
             trail.enabled = true;
 
+        OnTagged.Invoke();
         return true;
     }
 
@@ -44,8 +45,6 @@ public class PlayerTagBehavior : MonoBehaviour
     {
         //Get my trail renderer
         TrailRenderer trail = GetComponent<TrailRenderer>();
-        if (trail == null)
-            trail.enabled = true;
 
         //If I am tagged, turn tail on, otherwise off
         if (IsTagged)
@@ -73,14 +72,16 @@ public class PlayerTagBehavior : MonoBehaviour
         _canBeTagged = false;
 
         //Turn off trail if tagged
-        if(TryGetComponent(out TrailRenderer trail))
+        TrailRenderer trailRenderer = GetComponent<TrailRenderer>();
+        if(trailRenderer != null)
         {
-            trail.enabled = false;
+            trailRenderer.enabled = false;
         }
     }
 
     private void OnCollisionExit(Collision collision)
     {
+        //Wait limited time before function can be called
         Invoke("SetCanBeTagged", 0.5f);
     }
 }

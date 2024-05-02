@@ -117,7 +117,7 @@ Rigidbody:
   m_UseGravity: 1
   m_IsKinematic: 0
   m_Interpolate: 0
-  m_Constraints: 72
+  m_Constraints: 120
   m_CollisionDetection: 0
 --- !u!114 &1219103698177975641
 MonoBehaviour:
@@ -258,6 +258,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _isTagged: 0
+  _particleSystem: {fileID: 4558447082829064939}
+  OnTagged:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!1 &3522506998289101274
 GameObject:
   m_ObjectHideFlags: 0
@@ -308,7 +312,7 @@ ParticleSystem:
   emitterVelocityMode: 1
   looping: 0
   prewarm: 0
-  playOnAwake: 1
+  playOnAwake: 0
   useUnscaledTime: 0
   autoRandomSeed: 1
   startDelay:
